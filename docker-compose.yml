@@ -1,0 +1,47 @@
+services:
+  laravel:
+    container_name: '${APP_DOCKER_NAME}-server'
+    build:
+      context: './phpDockerfile'
+    image: '${APP_DOCKER_NAME}-server:dev-env'
+    ports:
+      - 8099:80
+    command: php artisan serve --host=0.0.0.0 --port=80
+    working_dir: /app
+    volumes:
+      - ./:/app
+    networks:
+      network:
+        ipv4_address: 172.4#.0.3
+    depends_on:
+      - postgresql
+
+  postgresql:
+    container_name: '${APP_DOCKER_NAME}-postgresql'
+    image: postgres:16-alpine3.20
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 5m
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - postgresql_vol:/var/lib/postgresql/data
+    networks:
+      network:
+        ipv4_address: 172.4#.0.2
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.4#.0.0/16
+
+volumes:
+  postgresql_vol:
+    driver: local
