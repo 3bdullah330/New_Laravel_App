@@ -33,3 +33,5 @@ RUN php ~/composer-setup.php --install-dir=/usr/local/bin --filename=composer
 RUN rm ~/composer-setup.php
 
 RUN apk del icu-dev
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]
